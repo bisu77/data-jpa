@@ -4,6 +4,9 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import study.datajpa.dto.MemberDto;
@@ -12,6 +15,7 @@ import study.datajpa.entity.Member;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -26,7 +30,7 @@ class MemberRepositoryTest {
         Member savedMember = memberRepository.save(member);
         List<Member> findMember = memberRepository.findByUsername("memberA");
 
-        Assertions.assertThat(findMember.get(0).getId()).isEqualTo(savedMember.getId());
+        assertThat(findMember.get(0).getId()).isEqualTo(savedMember.getId());
     }
 
     @Test
@@ -35,7 +39,7 @@ class MemberRepositoryTest {
         Member savedMember = memberRepository.save(member);
         List<Member> findMember = memberRepository.findUser("memberA");
 
-        Assertions.assertThat(findMember.get(0).getId()).isEqualTo(savedMember.getId());
+        assertThat(findMember.get(0).getId()).isEqualTo(savedMember.getId());
     }
 
     @Test
@@ -44,7 +48,7 @@ class MemberRepositoryTest {
         Member savedMember = memberRepository.save(member);
         List<Member> findMember = memberRepository.findByUsernameAndAge("memberA",1);
 
-        Assertions.assertThat(findMember.get(0).getId()).isEqualTo(savedMember.getId());
+        assertThat(findMember.get(0).getId()).isEqualTo(savedMember.getId());
     }
 
     @Test
@@ -60,8 +64,8 @@ class MemberRepositoryTest {
             System.out.println("member = " + member0);
         }
 
-        Assertions.assertThat(findMember.get(0).getId()).isEqualTo(savedMember.getId());
-        Assertions.assertThat(findMember.get(1).getId()).isEqualTo(savedMember2.getId());
+        assertThat(findMember.get(0).getId()).isEqualTo(savedMember.getId());
+        assertThat(findMember.get(1).getId()).isEqualTo(savedMember2.getId());
     }
 
     @Test
@@ -70,7 +74,7 @@ class MemberRepositoryTest {
         Member savedMember = memberRepository.save(member);
         List<MemberDto> findMember = memberRepository.findMemberDto("memberA");
 
-        Assertions.assertThat(findMember.get(0).getId()).isEqualTo(savedMember.getId());
+        assertThat(findMember.get(0).getId()).isEqualTo(savedMember.getId());
     }
 
     @Test
@@ -81,7 +85,38 @@ class MemberRepositoryTest {
 
         List<Member> findMemberList = memberRepository.findUser("memberA");//다건 조회(없으면 empty)
 
-        Assertions.assertThat(findMember.getId()).isEqualTo(savedMember.getId());
-        Assertions.assertThat(findMemberList.get(0).getId()).isEqualTo(savedMember.getId());
+        assertThat(findMember.getId()).isEqualTo(savedMember.getId());
+        assertThat(findMemberList.get(0).getId()).isEqualTo(savedMember.getId());
+    }
+
+    @Test
+    public void paging(){
+        Member memberA = new Member("memberA",10);
+        Member memberB = new Member("memberB",10);
+        Member memberC = new Member("memberC",10);
+        Member memberD = new Member("memberD",10);
+        Member memberE = new Member("memberE",10);
+
+        Member savedMemberA = memberRepository.save(memberA);
+        Member savedMemberB = memberRepository.save(memberB);
+        Member savedMemberC = memberRepository.save(memberC);
+        Member savedMemberD = memberRepository.save(memberD);
+        Member savedMemberE = memberRepository.save(memberE);
+
+        PageRequest pageRequest = PageRequest.of(0,3, Sort.by(Sort.Direction.DESC,"username"));
+
+        Page<Member> memberPage = memberRepository.findByAge2(10,pageRequest);
+
+        List<Member> members = memberPage.getContent();
+
+        for (Member member : members) {
+            System.out.println("member = " + member);
+        }
+
+        assertThat(memberPage.getNumber()).isEqualTo(0);
+        assertThat(memberPage.getTotalElements()).isEqualTo(5);
+        assertThat(memberPage.hasNext()).isTrue();
+        assertThat(memberPage.isFirst()).isTrue();
+        assertThat(memberPage.getTotalPages()).isEqualTo(2);
     }
 }
