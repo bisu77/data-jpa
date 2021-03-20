@@ -113,8 +113,6 @@ class MemberRepositoryTest {
             System.out.println("member = " + member);
         }
 
-
-
         assertThat(memberPage.getNumber()).isEqualTo(0);
         assertThat(memberPage.getTotalElements()).isEqualTo(5);
         assertThat(memberPage.hasNext()).isTrue();
