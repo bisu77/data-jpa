@@ -3,6 +3,7 @@ package study.datajpa.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -38,4 +39,11 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Modifying(clearAutomatically = true)// 해당옵션 설정 시 update 후 영속성컨텍스트 클리어!!
     @Query("update Member m set m.age = m.age+1 where m.age >= :age")
     int bulkUpdate(@Param("age") int age);
+
+    @Override
+    @EntityGraph(attributePaths = "team")//left join fetch team
+    List<Member> findAll();
+
+    @EntityGraph("Member.team")
+    List<Member> findFetchByUsername(@Param("username") String username);
 }

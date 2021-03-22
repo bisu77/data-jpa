@@ -1,6 +1,7 @@
 package study.datajpa.entity;
 
 import lombok.*;
+import org.springframework.data.jpa.repository.EntityGraph;
 
 import javax.persistence.*;
 
@@ -12,6 +13,7 @@ import javax.persistence.*;
         name="Member.findUser",
         query= "select m from Member m where m.username = :username"
 )
+@NamedEntityGraph(name = "Member.team", attributeNodes = @NamedAttributeNode("team"))
 public class Member {
     @Id
     @GeneratedValue
