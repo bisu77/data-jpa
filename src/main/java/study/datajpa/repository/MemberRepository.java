@@ -35,7 +35,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
             ,countQuery = "select count(m) from Member m where age = :age")
     Page<Member> findByAge2(@Param("age") int age, Pageable pageable);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)// 해당옵션 설정 시 update 후 영속성컨텍스트 클리어!!
     @Query("update Member m set m.age = m.age+1 where m.age >= :age")
     int bulkUpdate(@Param("age") int age);
 }

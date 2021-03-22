@@ -14,6 +14,7 @@ import study.datajpa.entity.Member;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -118,5 +119,43 @@ class MemberRepositoryTest {
         assertThat(memberPage.hasNext()).isTrue();
         assertThat(memberPage.isFirst()).isTrue();
         assertThat(memberPage.getTotalPages()).isEqualTo(2);
+    }
+
+    @Test
+    public void bulkUpdate() {
+        Member memberA = new Member("memberA", 10);
+        Member memberB = new Member("memberB", 11);
+        Member memberC = new Member("memberC", 20);
+        Member memberD = new Member("memberD", 32);
+        Member memberE = new Member("memberE", 43);
+
+        Member savedMemberA = memberRepository.save(memberA);
+        Member savedMemberB = memberRepository.save(memberB);
+        Member savedMemberC = memberRepository.save(memberC);
+        Member savedMemberD = memberRepository.save(memberD);
+        Member savedMemberE = memberRepository.save(memberE);
+
+        //Process 1. 영속성컨텍스트 DB flush();
+        int result = memberRepository.bulkUpdate(20);
+
+        //******************* JPA 기본제공 findById *******************//
+        //Process 2-1. 영속성컨텍스트 조회
+        //Process 2-2. 영속성컨텍스트 없으면 DB SELECT, 있으면 영속성컨텍스트 리턴
+        Optional<Member> member1 = memberRepository.findById(1l);
+        System.out.println("member1 = " + member1.get().toString());
+
+        //******************* 개발자 custom JPQL *******************//
+        //Process 2-1. 영속성 조회 없이 선 DB SELECT
+        //Process 2-2. 조회 리턴 값 영속성컨텍스트 저장 시도
+        //Process 2-3. 영속성컨텍스트 존재하면 SELECT 조회 데이터 삭제
+        List<Member> members = memberRepository.findAll();
+
+        //Process 3. 영속성컨텍스트 존재하기 때문에 벌크연산 수행 전 영속성컨텍스트 값 리턴
+        for (Member member : members) {
+            System.out.println("member.getAge() = " + member.getAge());
+        }
+
+        assertThat(result).isEqualTo(3);
+
     }
 }
