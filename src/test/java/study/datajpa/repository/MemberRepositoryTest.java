@@ -12,18 +12,22 @@ import org.springframework.transaction.annotation.Transactional;
 import study.datajpa.dto.MemberDto;
 import study.datajpa.entity.Member;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
 @Rollback(false)
 class MemberRepositoryTest {
     @Autowired MemberRepository memberRepository;
+
+    @PersistenceContext
+    private EntityManager em;
 
     @Test
     public void testMember(){
@@ -156,6 +160,59 @@ class MemberRepositoryTest {
         }
 
         assertThat(result).isEqualTo(3);
+    }
 
+    @Test
+    public void entityGraphTest(){
+        Member memberA = new Member("memberA", 10);
+        Member memberB = new Member("memberB", 11);
+        Member memberC = new Member("memberC", 20);
+        Member memberD = new Member("memberD", 32);
+        Member memberE = new Member("memberA", 43);
+
+        Member savedMemberA = memberRepository.save(memberA);
+        Member savedMemberB = memberRepository.save(memberB);
+        Member savedMemberC = memberRepository.save(memberC);
+        Member savedMemberD = memberRepository.save(memberD);
+        Member savedMemberE = memberRepository.save(memberE);
+
+        List<Member> all = memberRepository.findAll();
+
+        for (Member member : all) {
+            System.out.println("memberFetch1 = " + member);
+        }
+
+        List<Member> fetchAll = memberRepository.findFetchByUsername("memberA");
+
+        for (Member member : fetchAll) {
+            System.out.println("memberFetch2 = " + member);
+        }
+    }
+
+    @Test
+    public void queryHintTest() {
+        Member memberA = new Member("memberA", 10);
+        Member memberB = new Member("memberB", 11);
+        Member memberC = new Member("memberC", 20);
+        Member memberD = new Member("memberD", 32);
+        Member memberE = new Member("memberA", 43);
+
+        Member savedMemberA = memberRepository.save(memberA);
+        Member savedMemberB = memberRepository.save(memberB);
+        Member savedMemberC = memberRepository.save(memberC);
+        Member savedMemberD = memberRepository.save(memberD);
+        Member savedMemberE = memberRepository.save(memberE);
+
+        // ======================== dirty checking ======================== //
+        Member findMemberB = memberRepository.findById(memberB.getId()).get();
+        findMemberB.setUsername("memberA");// updated
+        em.flush();
+        em.clear();
+
+        // ======================== readOnly JPA HINT ======================== //
+        Member findMemberD = memberRepository.findReadOnlyByUsername("memberD").get(0);
+        findMemberD.setUsername("memberA");// not updated
+        em.flush();
+        em.clear();
     }
 }
