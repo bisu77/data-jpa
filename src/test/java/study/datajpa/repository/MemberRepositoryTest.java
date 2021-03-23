@@ -215,4 +215,25 @@ class MemberRepositoryTest {
         em.flush();
         em.clear();
     }
+
+    @Test
+    public void customRepositoryTest() {
+        Member memberA = new Member("memberA", 10);
+        Member memberB = new Member("memberB", 11);
+        Member memberC = new Member("memberC", 20);
+        Member memberD = new Member("memberD", 32);
+        Member memberE = new Member("memberA", 43);
+
+        Member savedMemberA = memberRepository.save(memberA);
+        Member savedMemberB = memberRepository.save(memberB);
+        Member savedMemberC = memberRepository.save(memberC);
+        Member savedMemberD = memberRepository.save(memberD);
+        Member savedMemberE = memberRepository.save(memberE);
+
+        List<Member> memberCustom = memberRepository.findMemberCustom();
+
+        for (Member member : memberCustom) {
+            System.out.println("member = " + member);
+        }
+    }
 }

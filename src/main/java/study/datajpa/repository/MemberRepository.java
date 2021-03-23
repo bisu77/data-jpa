@@ -11,7 +11,7 @@ import study.datajpa.entity.Member;
 import javax.persistence.QueryHint;
 import java.util.List;
 
-public interface MemberRepository extends JpaRepository<Member, Long> {
+public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom {
     List<Member> findByUsername(String username);
 
     @Query(name="Member.findUser")
@@ -47,4 +47,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     @QueryHints(value = @QueryHint(name="org.hibernate.readOnly", value="true"))
     List<Member> findReadOnlyByUsername(String username);
+
+
 }
