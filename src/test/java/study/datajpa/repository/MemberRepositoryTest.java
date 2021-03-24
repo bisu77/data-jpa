@@ -236,4 +236,24 @@ class MemberRepositoryTest {
             System.out.println("member = " + member);
         }
     }
+
+    @Test
+    public void auditTest() throws InterruptedException {
+        Member memberA = new Member("memberA", 10);
+        Member savedMemberA = memberRepository.save(memberA);
+
+        Thread.sleep(100);
+        savedMemberA.setUsername("memberB");
+
+        em.flush();
+        em.clear();
+
+        Member findMember = memberRepository.findById(savedMemberA.getId()).get();
+
+        System.out.println("findMember.getCreatedBy = " + findMember.getCreatedBy());
+        System.out.println("findMember.getCreatedDate = " + findMember.getCreatedDate());
+        System.out.println("findMember.getLastModifiedBy = " + findMember.getLastModifiedBy());
+        System.out.println("findMember.getLastModifedDate = " + findMember.getLastModifedDate());
+
+    }
 }
