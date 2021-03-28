@@ -52,7 +52,7 @@ public class MemberController {
         return memberRepository.findAll(pageable).map(MemberDto::new);
     }
 
-    @PostConstruct
+    //@PostConstruct
     private void init(){
         for(int i=0;i<100;i++){
             Member member = new Member("member"+i,i);
