@@ -4,13 +4,12 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import study.datajpa.dto.MemberDto;
 import study.datajpa.entity.Member;
+import study.datajpa.entity.Team;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -255,5 +254,30 @@ class MemberRepositoryTest {
         System.out.println("findMember.getLastModifiedBy = " + findMember.getLastModifiedBy());
         System.out.println("findMember.getLastModifiedDate = " + findMember.getLastModifedDate());
 
+    }
+
+    @Test
+    public void queryByExample(){
+        Member memberA = new Member("memberA", 10);
+        Team team = new Team("teamA");
+        em.persist(team);
+        memberA.setTeam(team);
+
+        Member savedMemberA = memberRepository.save(memberA);
+
+        em.flush();
+        em.clear();
+
+        Member findMember = new Member("memberA");
+        Team findTeam = new Team("teamA");//INNER JOIN만 가능
+        findMember.setTeam(findTeam);
+
+        ExampleMatcher matcher = ExampleMatcher.matching()//조회조건 제외 :: Property 제외 변수명
+                                                .withIgnorePaths(new String[]{"age", "createdDate", "lastModifedDate"});
+
+        Example<Member> example = Example.of(findMember,matcher);
+        List<Member> result = memberRepository.findAll(example);
+
+        assertThat(result.get(0).getUsername()).isEqualTo("memberA");
     }
 }
