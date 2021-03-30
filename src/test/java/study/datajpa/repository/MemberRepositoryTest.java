@@ -7,10 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.*;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
-import study.datajpa.dto.MemberDto;
-import study.datajpa.dto.NestedClosedProjection;
-import study.datajpa.dto.UsernameOnly;
-import study.datajpa.dto.UsernameOnlyDto;
+import study.datajpa.dto.*;
 import study.datajpa.entity.Member;
 import study.datajpa.entity.Team;
 
@@ -305,5 +302,43 @@ class MemberRepositoryTest {
             System.out.println("usernameOnly name = " + usernameOnly.getUsername());
             System.out.println("usernameOnly team = " + usernameOnly.getTeam());
         }
+    }
+
+    @Test
+    public void findNativeQuery() {
+        Member memberA = new Member("memberA", 10);
+        Team team = new Team("teamA");
+        em.persist(team);
+        memberA.setTeam(team);
+
+        Member savedMemberA = memberRepository.save(memberA);
+
+        em.flush();
+        em.clear();
+
+        Member memberA1 = memberRepository.findByNativeQuery("memberA");
+        System.out.println("memberA1 = " + memberA1);
+    }
+
+    @Test
+    public void findNativeProjection() {
+        Member memberA = new Member("memberA", 10);
+        Team team = new Team("teamA");
+        em.persist(team);
+        memberA.setTeam(team);
+
+        Member savedMemberA = memberRepository.save(memberA);
+
+        em.flush();
+        em.clear();
+
+        Page<MemberProjection> memberA1 = memberRepository.findByNativeProjection("memberA", PageRequest.of(0,10));
+        List<MemberProjection> result = memberA1.getContent();
+        for (MemberProjection memberProjection : result) {
+            System.out.println("memberProjection id = " + memberProjection.getId());
+            System.out.println("memberProjection username = " + memberProjection.getUsername());
+            System.out.println("memberProjection teamName = " + memberProjection.getTeamName());
+        }
+
     }
 }

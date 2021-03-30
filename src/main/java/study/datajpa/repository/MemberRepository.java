@@ -5,10 +5,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
-import study.datajpa.dto.MemberDto;
-import study.datajpa.dto.NestedClosedProjection;
-import study.datajpa.dto.UsernameOnly;
-import study.datajpa.dto.UsernameOnlyDto;
+import study.datajpa.dto.*;
 import study.datajpa.entity.Member;
 
 import javax.persistence.QueryHint;
@@ -51,11 +48,20 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
     @QueryHints(value = @QueryHint(name="org.hibernate.readOnly", value="true"))
     List<Member> findReadOnlyByUsername(String username);
 
-    List<UsernameOnly> findProjectionsByUsername(String username);
+    List<UsernameOnly> findProjectionsByUsername(String username);//인터페이스 방식 projections
 
-    List<UsernameOnlyDto> findUsernameDtoByUsername(String username);
+    List<UsernameOnlyDto> findUsernameDtoByUsername(String username);//클래스 방식 projections
 
-    <T> List<T> findUsernameByUsername(String username, Class<T> type);
+    <T> List<T> findUsernameByUsername(String username, Class<T> type);//동적 방식 projections
 
-    List<NestedClosedProjection> findNestedProjectionsByUsername(String username);
+    List<NestedClosedProjection> findNestedProjectionsByUsername(String username);// 중첩 방식 projections
+
+    @Query(value = "select * from member where username = ?", nativeQuery = true)
+    Member findByNativeQuery(String username);
+
+    @Query(value="select m.member_id as id, m.username, t.name as teamName " +
+                " from member m " +
+                " left outer join team t on m.team_id = t.team_id " +
+                " where m.username = ?",nativeQuery = true)
+    Page<MemberProjection> findByNativeProjection(@Param("username") String username, Pageable pageable);
 }
