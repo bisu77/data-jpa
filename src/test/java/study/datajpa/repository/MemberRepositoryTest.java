@@ -8,6 +8,9 @@ import org.springframework.data.domain.*;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import study.datajpa.dto.MemberDto;
+import study.datajpa.dto.NestedClosedProjection;
+import study.datajpa.dto.UsernameOnly;
+import study.datajpa.dto.UsernameOnlyDto;
 import study.datajpa.entity.Member;
 import study.datajpa.entity.Team;
 
@@ -279,5 +282,28 @@ class MemberRepositoryTest {
         List<Member> result = memberRepository.findAll(example);
 
         assertThat(result.get(0).getUsername()).isEqualTo("memberA");
+    }
+
+    @Test
+    public void findProjections() {
+        Member memberA = new Member("memberA", 10);
+        Team team = new Team("teamA");
+        em.persist(team);
+        memberA.setTeam(team);
+
+        Member savedMemberA = memberRepository.save(memberA);
+
+        em.flush();
+        em.clear();
+
+        //List<UsernameOnly> memberA1 = memberRepository.findUsernameOnlyByUsername("memberA");//인터페이스방식
+        //List<UsernameOnlyDto> memberA1 = memberRepository.findUsernameDtoByUsername("memberA");//클래스 방식
+        //List<UsernameOnly> memberA1 = memberRepository.findUsernameByUsername("memberA",UsernameOnly.class);//동적 projection 방식
+        List<NestedClosedProjection> memberA1 = memberRepository.findNestedProjectionsByUsername("memberA");//중첩 projection
+
+        for (NestedClosedProjection usernameOnly : memberA1) {
+            System.out.println("usernameOnly name = " + usernameOnly.getUsername());
+            System.out.println("usernameOnly team = " + usernameOnly.getTeam());
+        }
     }
 }

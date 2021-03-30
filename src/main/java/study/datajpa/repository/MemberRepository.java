@@ -6,6 +6,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import study.datajpa.dto.MemberDto;
+import study.datajpa.dto.NestedClosedProjection;
+import study.datajpa.dto.UsernameOnly;
+import study.datajpa.dto.UsernameOnlyDto;
 import study.datajpa.entity.Member;
 
 import javax.persistence.QueryHint;
@@ -48,5 +51,11 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
     @QueryHints(value = @QueryHint(name="org.hibernate.readOnly", value="true"))
     List<Member> findReadOnlyByUsername(String username);
 
+    List<UsernameOnly> findProjectionsByUsername(String username);
 
+    List<UsernameOnlyDto> findUsernameDtoByUsername(String username);
+
+    <T> List<T> findUsernameByUsername(String username, Class<T> type);
+
+    List<NestedClosedProjection> findNestedProjectionsByUsername(String username);
 }
